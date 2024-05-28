@@ -109,10 +109,15 @@ INNER JOIN product ON pc.model = product.model
 WHERE pc.speed >= 450
 ```
 __Задание 10:__
+Найдите модели принтеров, имеющих самую высокую цену. Вывести: model, price
 
 __Решение:__
 ```sql
-
+SELECT model,
+       price
+FROM   printer
+WHERE  price = (SELECT Max(price)
+                FROM   printer) 
 ```
 __Задание :__
 
