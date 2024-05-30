@@ -119,36 +119,57 @@ FROM   printer
 WHERE  price = (SELECT Max(price)
                 FROM   printer) 
 ```
-__Задание :__
+__Задание 11:__
+Найдите среднюю скорость ПК.
 
 __Решение:__
 ```sql
-
+SELECT avg(speed)
+FROM pc 
 ```
-__Задание :__
+__Задание 12:__
 
+Найдите среднюю скорость ПК-блокнотов, цена которых превышает 1000 дол.
 __Решение:__
 ```sql
-
+SELECT avg(speed)
+FROM laptop
+WHERE price>1000
 ```
-__Задание :__
+__Задание 13:__
+Найдите среднюю скорость ПК, выпущенных производителем A.
 
 __Решение:__
 ```sql
-
+SELECT avg(speed)
+FROM pc
+JOIN product
+    ON product.model = pc.model
+WHERE maker = 'A'
 ```
 
-__Задание :__
+__Задание 14:__
+Найдите класс, имя и страну для кораблей из таблицы Ships, имеющих не менее 10 орудий.
 
 __Решение:__
 ```sql
-
+SELECT ships.class,
+         name,
+         country
+FROM ships
+JOIN classes
+    ON ships.class = classes.class
+WHERE numGuns >=10 
 ```
-__Задание :__
+__Задание 15:__
 
+Найдите размеры жестких дисков, совпадающих у двух и более PC. Вывести: HD.
 __Решение:__
 ```sql
-
+SELECT hd
+FROM pc
+GROUP BY  hd
+HAVING count(hd)>=2 
 ```
 __Задание :__
 
