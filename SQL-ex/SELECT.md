@@ -414,58 +414,214 @@ FROM classes
 WHERE bore >= 16
 ```
 __Задание 32:__
+Одной из характеристик корабля является половина куба калибра его главных орудий (mw). С точностью до 2 десятичных знаков определите среднее значение mw для кораблей каждой страны, у которой есть корабли в базе данных.
+__Решение:__
+```sql
+SELECT country, cast(avg((power(bore, 3)/2)) AS numeric(6,2)) AS mw
+FROM 
+    (SELECT country, classes.class, bore, name 
+     FROM classes 
+     LEFT JOIN ships ON classes.class = ships.class
+     UNION ALL
+     SELECT DISTINCT country, class, bore, ship AS name 
+     FROM classes c
+     LEFT JOIN outcomes o ON c.class = o.ship
+     WHERE ship = class AND ship NOT IN (SELECT name FROM ships)) a
+WHERE name IS NOT NULL 
+GROUP BY country
+
+```
+__Задание 33:__
+Укажите корабли, потопленные в сражениях в Северной Атлантике (North Atlantic). Вывод: ship.
+__Решение:__
+```sql
+SELECT ship
+FROM outcomes
+WHERE battle = 'North Atlantic'
+  AND RESULT = 'sunk'
+```
+__Задание 34:__
+По Вашингтонскому международному договору от начала 1922 г. запрещалось строить линейные корабли водоизмещением более 35 тыс.тонн. Укажите корабли, нарушившие этот договор (учитывать только корабли c известным годом спуска на воду). Вывести названия кораблей.
+__Решение:__
+```sql
+SELECT DISTINCT name 
+FROM ships s 
+JOIN classes c ON c.class = s.class 
+WHERE type = 'bb' 
+AND displacement > 35000 
+AND launched >= 1922
+
+```
+__Задание 35:__
+В таблице Product найти модели, которые состоят только из цифр или только из латинских букв (A-Z, без учета регистра).
+Вывод: номер модели, тип модели.
+__Решение:__
+```sql
+select model, type from product
+WHERE model NOT LIKE '%[^a-zA-Z]%'
+or model NOT LIKE '%[^0-9]%'
+```
+__Задание 36:__
+Перечислите названия головных кораблей, имеющихся в базе данных (учесть корабли в Outcomes).
+
+__Решение:__
+```sql
+SELECT DISTINCT ship
+FROM outcomes o
+JOIN classes c ON c.class = o.ship
+UNION
+SELECT DISTINCT name
+FROM ships s
+JOIN classes c ON c.class = s.name
+```
+__Задание 37:__
+Найдите классы, в которые входит только один корабль из базы данных (учесть также корабли в Outcomes).
+
+__Решение:__
+```sql
+SELECT CLASS
+FROM
+  (SELECT DISTINCT CLASS,
+                   ship
+   FROM classes c
+   JOIN outcomes o ON c.class = o.ship
+   UNION SELECT DISTINCT c.class,
+                         name
+   FROM classes c
+   JOIN ships s ON c.class = s.class) a
+GROUP BY CLASS
+HAVING count(*)=1
+```
+__Задание 38:__
+Найдите страны, имевшие когда-либо классы обычных боевых кораблей ('bb') и имевшие когда-либо классы крейсеров ('bc').
+
+__Решение:__
+```sql
+SELECT country
+FROM classes
+WHERE TYPE = 'bb' INTERSECT
+  SELECT country
+  FROM classes WHERE TYPE = 'bc'
+```
+__Задание 39:__
+Найдите корабли, `сохранившиеся для будущих сражений`; т.е. выведенные из строя в одной битве (damaged), они участвовали в другой, произошедшей позже.
+
+__Решение:__
+```sql
+SELECT DISTINCT o1.ship
+FROM outcomes o1
+JOIN battles b1 ON b1.name = o1.battle
+WHERE o1.result = 'damaged'
+AND EXISTS (
+    SELECT 1
+    FROM outcomes o2
+    JOIN battles b2 ON b2.name = o2.battle
+    WHERE o2.ship = o1.ship
+    AND b2.date > b1.date
+)
+```
+__Задание 40:__
+Найти производителей, которые выпускают более одной модели, при этом все выпускаемые производителем модели являются продуктами одного типа.
+Вывести: maker, type
+__Решение:__
+```sql
+SELECT maker, MIN(type) AS type
+FROM product
+GROUP BY maker
+HAVING COUNT(*) > 1 AND COUNT(DISTINCT type) = 1
+
+```
+__Задание 41:__
+Для каждого производителя, у которого присутствуют модели хотя бы в одной из таблиц PC, Laptop или Printer,
+определить максимальную цену на его продукцию.
+Вывод: имя производителя, если среди цен на продукцию данного производителя присутствует NULL, то выводить для этого производителя NULL,
+иначе максимальную цену.
+__Решение:__
+```sql
+
+```
+__Задание 42:__
+Найдите названия кораблей, потопленных в сражениях, и название сражения, в котором они были потоплены.
+__Решение:__
+```sql
+SELECT ship,
+       battle
+FROM outcomes
+WHERE RESULT = 'sunk'
+```
+__Задание 43:__
 
 __Решение:__
 ```sql
 
 ```
-__Задание :__
+__Задание 44:__
+Найдите названия всех кораблей в базе данных, начинающихся с буквы R.
+__Решение:__
+```sql
+SELECT name
+FROM ships
+WHERE name like 'R%'
+UNION
+SELECT ship
+FROM outcomes
+WHERE ship like 'R%'
+```
+__Задание 45:__
+Найдите названия всех кораблей в базе данных, состоящие из трех и более слов (например, King George V).
+Считать, что слова в названиях разделяются единичными пробелами, и нет концевых пробелов
+__Решение:__
+```sql
+SELECT name
+FROM ships
+WHERE name like '% % %'
+UNION
+SELECT ship
+FROM outcomes
+WHERE ship like '% % %'
+
+```
+__Задание 46:__
 
 __Решение:__
 ```sql
 
 ```
-__Задание :__
+__Задание 47:__
 
 __Решение:__
 ```sql
 
 ```
-__Задание :__
+__Задание 48:__
 
 __Решение:__
 ```sql
 
 ```
-__Задание :__
-
+__Задание 49:__
+Найдите названия кораблей с орудиями калибра 16 дюймов (учесть корабли из таблицы Outcomes).
 __Решение:__
 ```sql
-
+SELECT name
+FROM ships s
+JOIN classes c ON c.class = s.class
+WHERE bore = 16
+UNION
+SELECT ship
+FROM outcomes o
+JOIN classes c ON c.class = o.ship
+WHERE bore = 16
 ```
-__Задание :__
-
+__Задание 50:__
+Найдите сражения, в которых участвовали корабли класса Kongo из таблицы Ships.
 __Решение:__
 ```sql
-
-```
-__Задание :__
-
-__Решение:__
-```sql
-
-```
-__Задание :__
-
-__Решение:__
-```sql
-
-```
-__Задание :__
-
-__Решение:__
-```sql
-
+SELECT DISTINCT battle
+FROM outcomes o
+JOIN ships s ON o.ship = s.name
+JOIN classes c ON c.class = s.class
+WHERE c.class = 'Kongo'
 ```
 -------------------------------------------------------------------------
 __Задание :__
