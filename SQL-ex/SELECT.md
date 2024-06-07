@@ -538,6 +538,23 @@ __Задание 41:__
 иначе максимальную цену.
 __Решение:__
 ```sql
+SELECT maker,
+       CASE 
+           WHEN COUNT(price) <> COUNT(*) THEN NULL
+           ELSE MAX(price)
+       END AS max_price
+FROM (SELECT p.maker, pc.price
+    FROM Product p
+    JOIN PC pc ON p.model = pc.model
+    UNION ALL
+    SELECT p.maker, l.price
+    FROM Product p
+    JOIN Laptop l ON p.model = l.model
+    UNION ALL
+    SELECT p.maker, pr.price
+    FROM Product p
+    JOIN Printer pr ON p.model = pr.model) a
+GROUP BY maker
 
 ```
 __Задание 42:__
