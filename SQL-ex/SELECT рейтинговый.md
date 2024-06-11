@@ -101,6 +101,14 @@ SELECT maker,
 FROM a
 ```
 
+maker	pc	laptop	printer
+A	yes(2)	yes(2)	yes(3)
+B	yes(1)	yes(1)	no
+C	no	yes(1)	no
+D	no	no	yes(2)
+E	yes(1)	no	yes(1)
+
+
 
 
 
