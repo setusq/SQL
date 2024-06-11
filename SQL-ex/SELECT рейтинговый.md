@@ -68,3 +68,39 @@ GROUP BY
     FORMAT(date, 'yyyy-MM')
 ```
 
+__Задание: 3__
+Для таблицы Product получить результирующий набор в виде таблицы со столбцами maker, pc, laptop и printer, в которой для каждого производителя требуется указать, производит он (yes) или нет (no) соответствующий тип продукции.
+В первом случае (yes) указать в скобках без пробела количество имеющихся в наличии (т.е. находящихся в таблицах PC, Laptop и Printer) различных по номерам моделей соответствующего типа.
+
+__Решение:__
+```sql
+WITH a AS
+  (SELECT maker,
+          [pc],
+          [laptop],
+          [printer]
+   FROM
+     (SELECT DISTINCT maker,
+                      TYPE,
+                      model
+      FROM product) src PIVOT (COUNT(model)
+                               FOR TYPE IN ([pc], [laptop], [printer])) pvt)
+SELECT maker,
+       CASE
+           WHEN pc > 0 THEN CONCAT('yes(', pc, ')')
+           ELSE 'no'
+       END AS pc,
+       CASE
+           WHEN laptop > 0 THEN CONCAT('yes(', laptop, ')')
+           ELSE 'no'
+       END AS laptop,
+       CASE
+           WHEN printer > 0 THEN CONCAT('yes(', printer, ')')
+           ELSE 'no'
+       END AS printer
+FROM a
+```
+
+
+
+
