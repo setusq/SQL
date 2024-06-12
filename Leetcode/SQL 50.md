@@ -338,8 +338,7 @@ FROM db
 WHERE pre_temp<temperature
   AND TIMESTAMPDIFF(DAY, pre_date, recordDate) = 1
 ```
-__1661. Average Time of Process per Machine
-__
+__1661. Average Time of Process per Machine__
 
 There is a factory website that has several machines each running the same number of processes. Write a solution to find the average time each machine takes to complete a process.
 
@@ -435,8 +434,7 @@ LEFT JOIN bonus ON employee.empid = bonus.empid
 WHERE bonus<1000
   OR bonus IS NULL
 ```
-__1280. Students and Examinations
-__
+__1280. Students and Examinations__
 
 Write a solution to find the number of times each student attended each exam.
 
@@ -782,8 +780,7 @@ GROUP BY contest_id
 ORDER BY percentage DESC,
          contest_id
 ```
-__1211. Queries Quality and Percentage
-__
+__1211. Queries Quality and Percentage__
 
 We define query quality as:
 
@@ -945,7 +942,468 @@ SELECT round(sum(CASE WHEN datediff(event_date, FIRST) = 1 THEN 1 ELSE 0 END)/co
 FROM a
 ```
 
-----
+# Sorting and Grouping
+__2356. Number of Unique Subjects Taught by Each Teacher__
+
+Write a solution to calculate the number of unique subjects each teacher teaches in the university.
+
+Return the result table in any order.
+
+```
+Input: 
+Teacher table:
++------------+------------+---------+
+| teacher_id | subject_id | dept_id |
++------------+------------+---------+
+| 1          | 2          | 3       |
+| 1          | 2          | 4       |
+| 1          | 3          | 3       |
+| 2          | 1          | 1       |
+| 2          | 2          | 1       |
+| 2          | 3          | 1       |
+| 2          | 4          | 1       |
++------------+------------+---------+
+Output:  
++------------+-----+
+| teacher_id | cnt |
++------------+-----+
+| 1          | 2   |
+| 2          | 4   |
++------------+-----+
+```
+
+__Solution:__
+```sql
+SELECT teacher_id,
+       count(DISTINCT subject_id) AS cnt
+FROM teacher
+GROUP BY teacher_id
+```
+__1141. User Activity for the Past 30 Days I__
+
+Write a solution to find the daily active user count for a period of 30 days ending 2019-07-27 inclusively. A user was active on someday if they made at least one activity on that day.
+
+Return the result table in any order.
+```
+Input: 
+Activity table:
++---------+------------+---------------+---------------+
+| user_id | session_id | activity_date | activity_type |
++---------+------------+---------------+---------------+
+| 1       | 1          | 2019-07-20    | open_session  |
+| 1       | 1          | 2019-07-20    | scroll_down   |
+| 1       | 1          | 2019-07-20    | end_session   |
+| 2       | 4          | 2019-07-20    | open_session  |
+| 2       | 4          | 2019-07-21    | send_message  |
+| 2       | 4          | 2019-07-21    | end_session   |
+| 3       | 2          | 2019-07-21    | open_session  |
+| 3       | 2          | 2019-07-21    | send_message  |
+| 3       | 2          | 2019-07-21    | end_session   |
+| 4       | 3          | 2019-06-25    | open_session  |
+| 4       | 3          | 2019-06-25    | end_session   |
++---------+------------+---------------+---------------+
+Output: 
++------------+--------------+ 
+| day        | active_users |
++------------+--------------+ 
+| 2019-07-20 | 2            |
+| 2019-07-21 | 2            |
++------------+--------------+ 
+```
+
+__Solution:__
+```sql
+SELECT activity_date AS DAY,
+       count(DISTINCT user_id) AS active_users
+FROM Activity
+WHERE activity_date BETWEEN '2019-06-28' AND '2019-07-27'
+GROUP BY activity_date
+```
+__1070. Product Sales Analysis III__
+
+Write a solution to select the product id, year, quantity, and price for the first year of every product sold.
+
+Return the resulting table in any order.
+```
+Input: 
+Sales table:
++---------+------------+------+----------+-------+
+| sale_id | product_id | year | quantity | price |
++---------+------------+------+----------+-------+ 
+| 1       | 100        | 2008 | 10       | 5000  |
+| 2       | 100        | 2009 | 12       | 5000  |
+| 7       | 200        | 2011 | 15       | 9000  |
++---------+------------+------+----------+-------+
+Product table:
++------------+--------------+
+| product_id | product_name |
++------------+--------------+
+| 100        | Nokia        |
+| 200        | Apple        |
+| 300        | Samsung      |
++------------+--------------+
+Output: 
++------------+------------+----------+-------+
+| product_id | first_year | quantity | price |
++------------+------------+----------+-------+ 
+| 100        | 2008       | 10       | 5000  |
+| 200        | 2011       | 15       | 9000  |
++------------+------------+----------+-------+
+```
+
+__Solution:__
+```sql
+SELECT product_id, year AS first_year, quantity, price 
+FROM Sales
+WHERE (product_id, year) IN (
+    SELECT product_id, MIN(year) 
+    FROM Sales 
+    GROUP BY product_id
+)
+```
+__596. Classes More Than 5 Students__
+
+Write a solution to find all the classes that have at least five students.
+
+Return the result table in any order.
+```
+Input: 
+Courses table:
++---------+----------+
+| student | class    |
++---------+----------+
+| A       | Math     |
+| B       | English  |
+| C       | Math     |
+| D       | Biology  |
+| E       | Math     |
+| F       | Computer |
+| G       | Math     |
+| H       | Math     |
+| I       | Math     |
++---------+----------+
+Output: 
++---------+
+| class   |
++---------+
+| Math    |
++---------+
+
+```
+
+__Solution:__
+```sql
+SELECT CLASS
+FROM Courses
+GROUP BY CLASS
+HAVING count(*)>=5
+```
+__1729. Find Followers Count__
+
+Write a solution that will, for each user, return the number of followers.
+
+Return the result table ordered by user_id in ascending order.
+```
+Input: 
+Followers table:
++---------+-------------+
+| user_id | follower_id |
++---------+-------------+
+| 0       | 1           |
+| 1       | 0           |
+| 2       | 0           |
+| 2       | 1           |
++---------+-------------+
+Output: 
++---------+----------------+
+| user_id | followers_count|
++---------+----------------+
+| 0       | 1              |
+| 1       | 1              |
+| 2       | 2              |
++---------+----------------+
+```
+
+__Solution:__
+```sql
+SELECT user_id,
+       count(DISTINCT follower_id) AS followers_count
+FROM Followers
+GROUP BY user_id
+```
+__619. Biggest Single Number__
+
+A single number is a number that appeared only once in the MyNumbers table.
+
+Find the largest single number. If there is no single number, report null.
+```
+Input: 
+MyNumbers table:
++-----+
+| num |
++-----+
+| 8   |
+| 8   |
+| 3   |
+| 3   |
+| 1   |
+| 4   |
+| 5   |
+| 6   |
++-----+
+Output: 
++-----+
+| num |
++-----+
+| 6   |
++-----+
+
+```
+
+__Solution:__
+```sql
+SELECT max(num) AS num
+FROM
+  (SELECT num
+   FROM MyNumbers
+   GROUP BY num
+   HAVING count(*)=1) AS a
+```
+__1045. Customers Who Bought All Products__
+
+Write a solution to report the customer ids from the Customer table that bought all the products in the Product table.
+
+Return the result table in any order.
+```
+Input: 
+Customer table:
++-------------+-------------+
+| customer_id | product_key |
++-------------+-------------+
+| 1           | 5           |
+| 2           | 6           |
+| 3           | 5           |
+| 3           | 6           |
+| 1           | 6           |
++-------------+-------------+
+Product table:
++-------------+
+| product_key |
++-------------+
+| 5           |
+| 6           |
++-------------+
+Output: 
++-------------+
+| customer_id |
++-------------+
+| 1           |
+| 3           |
++-------------+
+```
+
+__Solution:__
+```sql
+SELECT customer_id
+FROM Customer
+GROUP BY customer_id
+HAVING count(DISTINCT product_key) = (SELECT count(*) FROM Product)
+```
+# Advanced Select and Joins
+
+__1731. The Number of Employees Which Report to Each Employee__
+
+For this problem, we will consider a manager an employee who has at least 1 other employee reporting to them.
+
+Write a solution to report the ids and the names of all managers, the number of employees who report directly to them, and the average age of the reports rounded to the nearest integer.
+
+Return the result table ordered by employee_id.
+```
+Input: 
+Employees table:
++-------------+---------+------------+-----+
+| employee_id | name    | reports_to | age |
++-------------+---------+------------+-----+
+| 9           | Hercy   | null       | 43  |
+| 6           | Alice   | 9          | 41  |
+| 4           | Bob     | 9          | 36  |
+| 2           | Winston | null       | 37  |
++-------------+---------+------------+-----+
+Output: 
++-------------+-------+---------------+-------------+
+| employee_id | name  | reports_count | average_age |
++-------------+-------+---------------+-------------+
+| 9           | Hercy | 2             | 39          |
++-------------+-------+---------------+-------------+
+```
+
+__Solution:__
+
+```sql
+SELECT e1.reports_to AS employee_id,
+    e2.name,
+    count(*) AS reports_count,
+    round(avg(e1.age), 0) AS average_age
+FROM Employees e1
+JOIN Employees e2 
+ON e1.reports_to = e2.employee_id
+GROUP BY e1.reports_to
+HAVING e1.reports_to IS NOT NULL
+ORDER BY e1.reports_to
+```
+
+__1789. Primary Department for Each Employee__
+
+Employees can belong to multiple departments. When the employee joins other departments, they need to decide which department is their primary department. Note that when an employee belongs to only one department, their primary column is 'N'.
+
+Write a solution to report all the employees with their primary department. For employees who belong to one department, report their only department.
+
+Return the result table in any order.
+```
+Input: 
+Employee table:
++-------------+---------------+--------------+
+| employee_id | department_id | primary_flag |
++-------------+---------------+--------------+
+| 1           | 1             | N            |
+| 2           | 1             | Y            |
+| 2           | 2             | N            |
+| 3           | 3             | N            |
+| 4           | 2             | N            |
+| 4           | 3             | Y            |
+| 4           | 4             | N            |
++-------------+---------------+--------------+
+Output: 
++-------------+---------------+
+| employee_id | department_id |
++-------------+---------------+
+| 1           | 1             |
+| 2           | 1             |
+| 3           | 3             |
+| 4           | 3             |
++-------------+---------------+
+```
+
+__Solution:__
+```sql
+SELECT employee_id,
+       department_id
+FROM Employee
+WHERE primary_flag = 'Y'
+UNION
+SELECT employee_id,
+       department_id
+FROM Employee
+WHERE employee_id in
+    (SELECT employee_id
+     FROM Employee
+     GROUP BY employee_id
+     HAVING count(*)=1)
+```
+
+__610. Triangle Judgement__
+
+Report for every three line segments whether they can form a triangle.
+
+Return the result table in any order.
+```
+Input: 
+Triangle table:
++----+----+----+
+| x  | y  | z  |
++----+----+----+
+| 13 | 15 | 30 |
+| 10 | 20 | 15 |
++----+----+----+
+Output: 
++----+----+----+----------+
+| x  | y  | z  | triangle |
++----+----+----+----------+
+| 13 | 15 | 30 | No       |
+| 10 | 20 | 15 | Yes      |
++----+----+----+----------+
+```
+
+__Solution:__
+```sql
+SELECT *, 
+    CASE WHEN x+y>z AND x+z>y AND z+y>x THEN 'Yes' ELSE 'No' end as triangle
+FROM Triangle
+```
+__180. Consecutive Numbers__
+
+Find all numbers that appear at least three times consecutively.
+
+Return the result table in any order.
+```
+Input: 
+Logs table:
++----+-----+
+| id | num |
++----+-----+
+| 1  | 1   |
+| 2  | 1   |
+| 3  | 1   |
+| 4  | 2   |
+| 5  | 1   |
+| 6  | 2   |
+| 7  | 2   |
++----+-----+
+Output: 
++-----------------+
+| ConsecutiveNums |
++-----------------+
+| 1               |
++-----------------+
+```
+
+__Solution:__
+
+```sql
+SELECT DISTINCT l1.num as ConsecutiveNums
+FROM
+    Logs l1,
+    Logs l2,
+    Logs l3
+WHERE
+    l1.Id = l2.Id - 1
+    AND l2.Id = l3.Id - 1
+    AND l1.Num = l2.Num
+    AND l2.Num = l3.Num
+```
+__1164. Product Price at a Given Date__
+
+Write a solution to find the prices of all products on 2019-08-16. Assume the price of all products before any change is 10.
+
+Return the result table in any order.
+```
+Input: 
+Products table:
++------------+-----------+-------------+
+| product_id | new_price | change_date |
++------------+-----------+-------------+
+| 1          | 20        | 2019-08-14  |
+| 2          | 50        | 2019-08-14  |
+| 1          | 30        | 2019-08-15  |
+| 1          | 35        | 2019-08-16  |
+| 2          | 65        | 2019-08-17  |
+| 3          | 20        | 2019-08-18  |
++------------+-----------+-------------+
+Output: 
++------------+-------+
+| product_id | price |
++------------+-------+
+| 2          | 50    |
+| 1          | 35    |
+| 3          | 10    |
++------------+-------+
+```
+
+__Solution:__
+
+```sql
+
+```
 __ __
 
 
@@ -954,6 +1412,34 @@ __ __
 ```
 
 __Solution:__
+
+```sql
+
+```
+__ __
+
+
+```
+
+```
+
+__Solution:__
+
+```sql
+
+```
+
+----
+
+__ __
+
+
+```
+
+```
+
+__Solution:__
+
 ```sql
 
 ```
