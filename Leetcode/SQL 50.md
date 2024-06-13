@@ -1402,25 +1402,85 @@ Output:
 __Solution:__
 
 ```sql
-
+SELECT p.product_id,
+       ifnull(p2.price, 10) AS price
+FROM
+  (SELECT DISTINCT product_id FROM Products) p
+LEFT JOIN
+  (SELECT DISTINCT product_id, first_value(new_price) over(PARTITION BY product_id ORDER BY change_date DESC) AS price
+   FROM Products
+   WHERE change_date<='2019-08-16') p2 ON p.product_id = p2.product_id
 ```
-__ __
+__1204. Last Person to Fit in the Bus__
 
+There is a queue of people waiting to board a bus. However, the bus has a weight limit of 1000 kilograms, so there may be some people who cannot board.
 
+Write a solution to find the person_name of the last person that can fit on the bus without exceeding the weight limit. The test cases are generated such that the first person does not exceed the weight limit.
 ```
-
+Input: 
+Queue table:
++-----------+-------------+--------+------+
+| person_id | person_name | weight | turn |
++-----------+-------------+--------+------+
+| 5         | Alice       | 250    | 1    |
+| 4         | Bob         | 175    | 5    |
+| 3         | Alex        | 350    | 2    |
+| 6         | John Cena   | 400    | 3    |
+| 1         | Winston     | 500    | 6    |
+| 2         | Marie       | 200    | 4    |
++-----------+-------------+--------+------+
+Output: 
++-------------+
+| person_name |
++-------------+
+| John Cena   |
++-------------+
 ```
 
 __Solution:__
 
 ```sql
+SELECT person_name 
+FROM
+(SELECT 
+    *, SUM(weight) OVER (ORDER BY turn ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as sum_weight
+FROM 
+    Queue) a
+WHERE sum_weight<=1000
+ORDER BY sum_weight DESC
+LIMIT 1
+
 
 ```
-__ __
+__1907. Count Salary Categories__
 
+Write a solution to calculate the number of bank accounts for each salary category. The salary categories are:
 
+- "Low Salary": All the salaries strictly less than $20000.
+- "Average Salary": All the salaries in the inclusive range [$20000, $50000].
+- "High Salary": All the salaries strictly greater than $50000.
+The result table must contain all three categories. If there are no accounts in a category, return 0.
+
+Return the result table in any order.
 ```
-
+Input: 
+Accounts table:
++------------+--------+
+| account_id | income |
++------------+--------+
+| 3          | 108939 |
+| 2          | 12747  |
+| 8          | 87709  |
+| 6          | 91796  |
++------------+--------+
+Output: 
++----------------+----------------+
+| category       | accounts_count |
++----------------+----------------+
+| Low Salary     | 1              |
+| Average Salary | 0              |
+| High Salary    | 3              |
++----------------+----------------+
 ```
 
 __Solution:__
