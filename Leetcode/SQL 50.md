@@ -1487,8 +1487,169 @@ __Solution:__
 
 ```sql
 
+SELECT 'Low Salary' as category, COUNT(*) as accounts_count
+FROM Accounts
+WHERE income < 20000
+UNION ALL
+SELECT 'Average Salary' as category, COUNT(*) as accounts_count
+FROM Accounts
+WHERE income BETWEEN 20000 AND 50000
+UNION ALL
+SELECT 'High Salary' as category, COUNT(*) as accounts_count
+FROM Accounts
+WHERE income > 50000;
+
+
+```
+# Subqueries
+
+__1978. Employees Whose Manager Left the Company__
+
+Find the IDs of the employees whose salary is strictly less than $30000 and whose manager left the company. When a manager leaves the company, their information is deleted from the Employees table, but the reports still have their manager_id set to the manager that left.
+
+Return the result table ordered by employee_id.
+
+```
+Input:  
+Employees table:
++-------------+-----------+------------+--------+
+| employee_id | name      | manager_id | salary |
++-------------+-----------+------------+--------+
+| 3           | Mila      | 9          | 60301  |
+| 12          | Antonella | null       | 31000  |
+| 13          | Emery     | null       | 67084  |
+| 1           | Kalel     | 11         | 21241  |
+| 9           | Mikaela   | null       | 50937  |
+| 11          | Joziah    | 6          | 28485  |
++-------------+-----------+------------+--------+
+Output: 
++-------------+
+| employee_id |
++-------------+
+| 11          |
++-------------+
 ```
 
+__Solution:__
+
+```sql
+SELECT employee_id FROM Employees
+WHERE salary < 30000 
+AND  manager_id NOT IN (SELECT employee_id FROM Employees)
+ORDER BY employee_id
+```
+
+__626. Exchange Seats__
+
+Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not swapped.
+
+Return the result table ordered by id in ascending order.
+```
+Input: 
+Seat table:
++----+---------+
+| id | student |
++----+---------+
+| 1  | Abbot   |
+| 2  | Doris   |
+| 3  | Emerson |
+| 4  | Green   |
+| 5  | Jeames  |
++----+---------+
+Output: 
++----+---------+
+| id | student |
++----+---------+
+| 1  | Doris   |
+| 2  | Abbot   |
+| 3  | Green   |
+| 4  | Emerson |
+| 5  | Jeames  |
++----+---------+
+```
+
+__Solution:__
+
+```sql
+WITH a as (SELECT *, LAG(student) OVER (ORDER BY id) as prev, LEAD(student, 1, student) OVER (ORDER BY id) as next FROM Seat)
+
+SELECT id, CASE WHEN id%2!=0 THEN next ELSE prev END as student 
+FROM a
+```
+
+__1341. Movie Rating__
+
+Write a solution to:
+
+- Find the name of the user who has rated the greatest number of movies. In case of a tie, return the lexicographically smaller user name.
+- Find the movie name with the highest average rating in February 2020. In case of a tie, return the lexicographically smaller movie name.
+The result format is in the following example.
+```
+Input: 
+Movies table:
++-------------+--------------+
+| movie_id    |  title       |
++-------------+--------------+
+| 1           | Avengers     |
+| 2           | Frozen 2     |
+| 3           | Joker        |
++-------------+--------------+
+Users table:
++-------------+--------------+
+| user_id     |  name        |
++-------------+--------------+
+| 1           | Daniel       |
+| 2           | Monica       |
+| 3           | Maria        |
+| 4           | James        |
++-------------+--------------+
+MovieRating table:
++-------------+--------------+--------------+-------------+
+| movie_id    | user_id      | rating       | created_at  |
++-------------+--------------+--------------+-------------+
+| 1           | 1            | 3            | 2020-01-12  |
+| 1           | 2            | 4            | 2020-02-11  |
+| 1           | 3            | 2            | 2020-02-12  |
+| 1           | 4            | 1            | 2020-01-01  |
+| 2           | 1            | 5            | 2020-02-17  | 
+| 2           | 2            | 2            | 2020-02-01  | 
+| 2           | 3            | 2            | 2020-03-01  |
+| 3           | 1            | 3            | 2020-02-22  | 
+| 3           | 2            | 4            | 2020-02-25  | 
++-------------+--------------+--------------+-------------+
+Output: 
++--------------+
+| results      |
++--------------+
+| Daniel       |
+| Frozen 2     |
++--------------+
+```
+
+__Solution:__
+
+```sql
+SELECT results from (SELECT name as results
+FROM MovieRating r 
+JOIN Users u
+ON u.user_id = r.user_id
+GROUP BY r.user_id 
+ORDER BY count(*) DESC, name 
+LIMIT 1) a
+
+UNION ALL
+
+SELECT results FROM (SELECT title as results
+FROM MovieRating r 
+JOIN Movies m
+ON m.movie_id = r.movie_id
+WHERE created_at BETWEEN '2020-02-01' AND '2020-02-29'
+GROUP BY r.movie_id 
+ORDER BY avg(rating) DESC, title 
+LIMIT 1) b
+
+
+```
 ----
 
 __ __
