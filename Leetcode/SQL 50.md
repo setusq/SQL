@@ -1647,10 +1647,186 @@ WHERE created_at BETWEEN '2020-02-01' AND '2020-02-29'
 GROUP BY r.movie_id 
 ORDER BY avg(rating) DESC, title 
 LIMIT 1) b
+```
+__1321. Restaurant Growth__
+
+You are the restaurant owner and you want to analyze a possible expansion (there will be at least one customer every day).
+
+Compute the moving average of how much the customer paid in a seven days window (i.e., current day + 6 days before). average_amount should be rounded to two decimal places.
+
+Return the result table ordered by visited_on in ascending order.
+
+```
+Input: 
+Customer table:
++-------------+--------------+--------------+-------------+
+| customer_id | name         | visited_on   | amount      |
++-------------+--------------+--------------+-------------+
+| 1           | Jhon         | 2019-01-01   | 100         |
+| 2           | Daniel       | 2019-01-02   | 110         |
+| 3           | Jade         | 2019-01-03   | 120         |
+| 4           | Khaled       | 2019-01-04   | 130         |
+| 5           | Winston      | 2019-01-05   | 110         | 
+| 6           | Elvis        | 2019-01-06   | 140         | 
+| 7           | Anna         | 2019-01-07   | 150         |
+| 8           | Maria        | 2019-01-08   | 80          |
+| 9           | Jaze         | 2019-01-09   | 110         | 
+| 1           | Jhon         | 2019-01-10   | 130         | 
+| 3           | Jade         | 2019-01-10   | 150         | 
++-------------+--------------+--------------+-------------+
+Output: 
++--------------+--------------+----------------+
+| visited_on   | amount       | average_amount |
++--------------+--------------+----------------+
+| 2019-01-07   | 860          | 122.86         |
+| 2019-01-08   | 840          | 120            |
+| 2019-01-09   | 840          | 120            |
+| 2019-01-10   | 1000         | 142.86         |
++--------------+--------------+----------------+
+```
+
+__Solution:__
+
+```sql
+SELECT * FROM (
+SELECT visited_on, 
+    SUM(amount) OVER(ORDER BY visited_on RANGE INTERVAL 6 DAY PRECEDING) AS amount,
+    ROUND(AVG(amount) OVER(ORDER BY visited_on RANGE INTERVAL 6 DAY PRECEDING), 2) AS average_amount
+FROM (SELECT visited_on, SUM(amount) AS amount
+    FROM Customer 
+    GROUP BY visited_on ORDER BY visited_on) b ) c
+WHERE visited_on >= (SELECT DATE_SUB(MIN(visited_on), INTERVAL -6 DAY) FROM Customer)
+```
+__602. Friend Requests II: Who Has the Most Friends__
+
+Write a solution to find the people who have the most friends and the most friends number.
+
+The test cases are generated so that only one person has the most friends.
+
+```
+Input: 
+RequestAccepted table:
++--------------+-------------+-------------+
+| requester_id | accepter_id | accept_date |
++--------------+-------------+-------------+
+| 1            | 2           | 2016/06/03  |
+| 1            | 3           | 2016/06/08  |
+| 2            | 3           | 2016/06/08  |
+| 3            | 4           | 2016/06/09  |
++--------------+-------------+-------------+
+Output: 
++----+-----+
+| id | num |
++----+-----+
+| 3  | 3   |
++----+-----+
+```
+
+__Solution:__
+
+```sql
+SELECT id, COUNT(*) as num
+FROM 
+(SELECT requester_id as id, accepter_id as id2 FROM RequestAccepted
+UNION ALL
+SELECT accepter_id as id, requester_id as id2 FROM RequestAccepted) a
+GROUP BY id
+ORDER BY COUNT(*) DESC
+LIMIT 1
+```
+
+__585. Investments in 2016__
+
+Write a solution to report the sum of all total investment values in 2016 tiv_2016, for all policyholders who:
+
+- have the same tiv_2015 value as one or more other policyholders, and
+- are not located in the same city as any other policyholder (i.e., the (lat, lon) attribute pairs must be unique).
+Round tiv_2016 to two decimal places.
+
+```
+Input: 
+Insurance table:
++-----+----------+----------+-----+-----+
+| pid | tiv_2015 | tiv_2016 | lat | lon |
++-----+----------+----------+-----+-----+
+| 1   | 10       | 5        | 10  | 10  |
+| 2   | 20       | 20       | 20  | 20  |
+| 3   | 10       | 30       | 20  | 20  |
+| 4   | 10       | 40       | 40  | 40  |
++-----+----------+----------+-----+-----+
+Output: 
++----------+
+| tiv_2016 |
++----------+
+| 45.00    |
++----------+
+```
+
+__Solution:__
+
+```sql
+SELECT ROUND(SUM(tiv_2016),2) AS tiv_2016 FROM Insurance i
+WHERE tiv_2015 IN (SELECT tiv_2015 FROM Insurance WHERE pid <> i.pid)
+AND (lat, lon) NOT IN (SELECT lat, lon FROM Insurance WHERE pid <> i.pid)
+```
+
+__185. Department Top Three Salaries__
+
+A company's executives are interested in seeing who earns the most money in each of the company's departments. A high earner in a department is an employee who has a salary in the top three unique salaries for that department.
+
+Write a solution to find the employees who are high earners in each of the departments.
+
+Return the result table in any order.
+
+```
+Input: 
+Employee table:
++----+-------+--------+--------------+
+| id | name  | salary | departmentId |
++----+-------+--------+--------------+
+| 1  | Joe   | 85000  | 1            |
+| 2  | Henry | 80000  | 2            |
+| 3  | Sam   | 60000  | 2            |
+| 4  | Max   | 90000  | 1            |
+| 5  | Janet | 69000  | 1            |
+| 6  | Randy | 85000  | 1            |
+| 7  | Will  | 70000  | 1            |
++----+-------+--------+--------------+
+Department table:
++----+-------+
+| id | name  |
++----+-------+
+| 1  | IT    |
+| 2  | Sales |
++----+-------+
+Output: 
++------------+----------+--------+
+| Department | Employee | Salary |
++------------+----------+--------+
+| IT         | Max      | 90000  |
+| IT         | Joe      | 85000  |
+| IT         | Randy    | 85000  |
+| IT         | Will     | 70000  |
+| Sales      | Henry    | 80000  |
+| Sales      | Sam      | 60000  |
++------------+----------+--------+
+```
+
+__Solution:__
+
+```sql
+SELECT d.name as Department, a.name as Employee, salary as Salary
+FROM (SELECT *, DENSE_RANK() OVER (PARTITION BY departmentId ORDER BY salary DESC) AS rn
+FROM 
+Employee) a
+JOIN Department d
+ON a.departmentId = d.id
+WHERE rn<=3
 
 
 ```
 ----
+
 
 __ __
 
