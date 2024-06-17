@@ -19,7 +19,7 @@
 
 1. **[Упражнения с сайта SQL-ex](https://sql-ex.ru/)**
    - **[SELECT (обучающий этап)](./SQL-ex/SELECT.md)**
-   - **[SELECT (рейтинговый этап)](./SQL-ex/SELECT рейтинговый.md)**
+   - **[SELECT (рейтинговый этап)](./SQL-ex/SELECT%20рейтинговый.md)**
    - **[DML](./SQL-ex/DML.md)**
 2. **[Упражнения с сайта Leetcode](https://leetcode.com/)**
    - **[SQL 50](./SQL-ex/DML.md)**
