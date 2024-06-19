@@ -40,4 +40,21 @@ SELECT SUM(CASE WHEN device_type = 'laptop' THEN 1 ELSE 0 END) as laptop_views,
   SUM(CASE WHEN device_type = 'phone' OR device_type = 'tablet'  THEN 1 ELSE 0 END) as mobile_views
 FROM viewership;
 ```
+__[Average Post Hiatus (Part 1) [Facebook SQL Interview Question]](https://datalemur.com/questions/sql-average-post-hiatus-1)__
+> Company: Facebook
+```sql
+SELECT user_id, DATE_PART('day', MAX(post_date) - MIN(post_date)) as days_between FROM posts
+WHERE post_date BETWEEN '01-01-2021' AND '12-31-2021'
+GROUP BY user_id
+HAVING DATE_PART('day', MAX(post_date) - MIN(post_date)) <> 0
+```
 
+__[Teams Power Users [Microsoft SQL Interview Question]](https://datalemur.com/questions/teams-power-users)__
+> Company: Microsift
+```sql
+SELECT sender_id, count(*) as message_count FROM messages
+WHERE sent_date BETWEEN '08-01-2022' AND '08-31-2022'
+GROUP BY sender_id
+ORDER BY count(*) DESC
+LIMIT 2
+```
