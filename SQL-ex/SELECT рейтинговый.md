@@ -67,6 +67,28 @@ FROM
 GROUP BY
     FORMAT(date, 'yyyy-MM')
 ```
+```sql
+
+with month as (
+select distinct year(date) year, month(date) month from battles),
+all_data as (
+select datefromparts(year, month, 1) date, datename(weekday, datefromparts(year, month, 1)) week from month
+union all
+select dateadd(day, 1, date) date , datename(weekday, dateadd(day, 1, date)) week  from all_data
+where dateadd(day, 1, date) <= eomonth(date)
+)
+select format(date, 'yyyy-MM') m, 
+sum(case when week = 'Monday' then 1 else 0 end) Mon,
+sum(case when week = 'Tuesday' then 1 else 0 end) Tue,
+sum(case when week = 'Wednesday' then 1 else 0 end) Wed,
+sum(case when week = 'Thursday' then 1 else 0 end) Thu,
+sum(case when week = 'Friday' then 1 else 0 end) Fri,
+sum(case when week = 'Saturday' then 1 else 0 end) Sat,
+sum(case when week = 'Sunday' then 1 else 0 end) Sun
+from all_data
+group by format(date, 'yyyy-MM')
+
+```
 
 __Задание: 3__
 
